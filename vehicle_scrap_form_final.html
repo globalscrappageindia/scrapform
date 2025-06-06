@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Vehicle Scrap Value Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; }
+    label { display: block; margin-top: 10px; }
+    input[type="number"], input[type="text"] { width: 200px; }
+    .result { margin-top: 20px; font-weight: bold; }
+    .admin-label { color: red; font-size: 0.9em; margin-left: 5px; }
+  </style>
+</head>
+<body>
+  <h2>Vehicle Scrap Value Calculator</h2>
+
+  <label>SPL No.: <input type="text" id="splNo" placeholder="e.g. SPL/2025/XYZ"></label>
+  <label>Car Make: <input type="text" id="carMake"></label>
+  <label>Car Model: <input type="text" id="carModel"></label>
+  <label>Car Year: <input type="number" id="carYear"></label>
+
+  <label>Unladen Weight (kg): <input type="number" id="weight" required></label>
+  <!-- Base Rate is hardcoded in script below as 30 Rs/kg -->
+  <label>
+    Towing Charges (Rs): 
+    <input type="number" id="towing" value="0">
+    
+  </label>
+
+  <label><input type="checkbox" id="fireLoss"> Fire Loss (-12%)</label>
+  <label><input type="checkbox" id="batteryMissing"> Battery Missing (-5.5%)</label>
+  <label><input type="checkbox" id="spareMissing"> Spare Wheel Missing (-3%)</label>
+  <label><input type="checkbox" id="alloy"> Alloy Wheels Fitted (+6%)</label>
+  <label><input type="checkbox" id="codTrade"> COD Trade Done (+6%)</label>
+  <label><input type="checkbox" id="cng"> CNG Kit Fitted (+4%)</label>
+  <label><input type="checkbox" id="toyota"> Toyota Vehicle (+5%)</label>
+  <label><input type="checkbox" id="luxury"> BMW / Merc / Audi (+10%)</label>
+
+  <button onclick="calculateAndSubmit()">Calculate & Submit</button>
+
+  <div class="result" id="finalRate"></div>
+  <div class="result" id="netRate">
+   
+  </div>
+
+  <script>
+    // Base Rate is hardcoded here
+    const BASE_RATE = 30; // Rs/kg
+
+    function calculateAndSubmit() {
+      const splNo = document.getElementById("splNo").value;
+      const carMake = document.getElementById("carMake").value;
+      const carModel = document.getElementById("carModel").value;
+      const carYear = document.getElementById("carYear").value;
+
+      const weight = parseFloat(document.getElementById("weight").value);
+      const towing = parseFloat(document.getElementById("towing").value);
+
+      const fireLoss = document.getElementById("fireLoss").checked;
+      const batteryMissing = document.getElementById("batteryMissing").checked;
+      const spareMissing = document.getElementById("spareMissing").checked;
+      const alloy = document.getElementById("alloy").checked;
+      const codTrade = document.getElementById("codTrade").checked;
+      const cng = document.getElementById("cng").checked;
+      const toyota = document.getElementById("toyota").checked;
+      const luxury = document.getElementById("luxury").checked;
+
+      if (isNaN(weight) || weight <= 0) {
+        alert("Please enter a valid weight.");
+        return;
+      }
+
+      let baseAmount = weight * BASE_RATE;
+      let adjustment = 0;
+
+      if (fireLoss) adjustment -= 0.12;
+      if (batteryMissing) adjustment -= 0.055;
+      if (spareMissing) adjustment -= 0.03;
+      if (alloy) adjustment += 0.06;
+      if (codTrade) adjustment += 0.06;
+      if (cng) adjustment += 0.04;
+      if (toyota) adjustment += 0.05;
+      if (luxury) adjustment += 0.10;
+
+      const adjustedAmount = baseAmount * (1 + adjustment) - towing;
+      const ratePerKg = adjustedAmount / weight;
+
+      document.getElementById("finalRate").textContent = `Final Rate: ₹${adjustedAmount.toFixed(2)} per vehicle`;
+      document.getElementById("netRate").innerHTML = `Net Rate: ₹${ratePerKg.toFixed(2)} per kg <span class="admin-label">(Only for Admin)</span>`;
+
+      // Send data to Google Sheets (to be set up separately)
+      const data = {
+        splNo, carMake, carModel, carYear,
+        weight, towing,
+        adjustedAmount: adjustedAmount.toFixed(2),
+        ratePerKg: ratePerKg.toFixed(2),
+        fireLoss,
+        batteryMissing,
+        spareMissing,
+        alloy,
+        codTrade,
+        cng,
+        toyota,
+        luxury,
+        timestamp: new Date().toISOString()
+      };
+
+     fetch('https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec', {
+
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+    }
+  </script>
+</body>
+</html>
