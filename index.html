@@ -1,111 +1,56 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Vehicle Scrap Value Calculator</title>
+  <title>Scrap Calculator - Admin Configurable</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f2f2f2;
-      color: #333;
-      max-width: 700px;
-      margin: auto;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
       padding: 20px;
-      box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-      background: white;
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
       border-radius: 10px;
-      margin-top: 40px;
     }
-    #authSection {
-      text-align: center;
-      margin-top: 60px;
+    .section { margin-top: 20px; }
+    label { display: block; margin-top: 10px; }
+    input[type="text"], input[type="number"], input[type="password"] {
+      width: 100%; padding: 8px; margin-top: 4px; box-sizing: border-box;
     }
-    #authSection input {
-      padding: 10px;
-      font-size: 16px;
-      margin-top: 10px;
-      width: 200px;
-    }
-    #authSection button {
-      padding: 10px 20px;
-      margin-top: 10px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #formSection { display: none; }
-    h2 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .logo {
-      display: block;
-      margin: 0 auto 20px;
-      max-width: 250px;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-    input[type="number"], input[type="text"] {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    input[type="checkbox"] {
-      margin-right: 5px;
-    }
+    input[type="checkbox"] { margin-right: 5px; }
     button {
-      margin-top: 20px;
-      width: 100%;
-      background-color: #007BFF;
-      color: white;
-      border: none;
-      padding: 12px;
-      font-size: 16px;
-      border-radius: 5px;
-      cursor: pointer;
+      margin-top: 20px; padding: 10px 20px; background-color: #007BFF;
+      color: white; border: none; border-radius: 5px; cursor: pointer;
     }
-    button:hover {
-      background-color: #0056b3;
-    }
-    .result {
-      margin-top: 20px;
-      font-weight: bold;
-      font-size: 16px;
-      color: #333;
-    }
-    .admin-label {
-      color: red;
-      font-size: 0.9em;
-      margin-left: 5px;
-    }
+    button:hover { background-color: #0056b3; }
+    .result { margin-top: 20px; font-weight: bold; }
+    .admin-section { display: none; border: 1px solid #ccc; padding: 15px; margin-top: 20px; border-radius: 6px; background: #f9f9f9; }
   </style>
 </head>
 <body>
-  <div id="authSection">
-    <h2>Please Enter Password to Access</h2>
-    <input type="password" id="passwordInput" placeholder="Enter password">
-    <br>
-    <button onclick="checkPassword()">Unlock</button>
-  </div>
 
-  <div id="formSection">
-    <img class="logo" src="https://globalscrappageyardsindia.wordpress.com/wp-content/uploads/2024/07/global-1-1.png" alt="Global Scrappage Yards Logo">
-    <h2>Vehicle Scrap Value Calculator</h2>
+<h2>Vehicle Scrap Value Calculator</h2>
 
-    <label>SPL No.: <input type="text" id="splNo" placeholder="e.g. SPL/2025/XYZ"></label>
+<!-- Password Authentication -->
+<div id="authSection">
+  <label>Enter Form Password:
+    <input type="password" id="passwordInput">
+  </label>
+  <button onclick="checkPassword()">Login</button>
+</div>
+
+<!-- Main Form Section -->
+<div id="formSection" style="display:none">
+  <div class="section">
+    <label>SPL No.: <input type="text" id="splNo"></label>
     <label>Car Make: <input type="text" id="carMake"></label>
     <label>Car Model: <input type="text" id="carModel"></label>
     <label>Car Year: <input type="number" id="carYear"></label>
-    <label>Unladen Weight (kg): <input type="number" id="weight" required></label>
-    <label>
-      Towing Charges (Rs):
-      <input type="number" id="towing" value="0">
-    </label>
+    <label>Unladen Weight (kg): <input type="number" id="weight"></label>
+    <label>Towing Charges (Rs): <input type="number" id="towing" value="0"></label>
+  </div>
 
+  <div class="section">
     <label><input type="checkbox" id="fireLoss"> Fire Loss</label>
     <label><input type="checkbox" id="batteryMissing"> Battery Missing</label>
     <label><input type="checkbox" id="spareMissing"> Spare Wheel Missing</label>
@@ -114,93 +59,125 @@
     <label><input type="checkbox" id="cng"> CNG Kit Fitted</label>
     <label><input type="checkbox" id="toyota"> Toyota Vehicle</label>
     <label><input type="checkbox" id="luxury"> BMW / Merc / Audi</label>
-
-    <button onclick="calculateAndSubmit()">Calculate & Submit</button>
-
-    <div class="result" id="finalRate"></div>
-    <div class="result" id="netRate">
-      <span class="admin-label">(Only for Admin)</span>
-    </div>
   </div>
 
-  <script>
-    const BASE_RATE = 30; // Rs/kg
-    const PASSWORD = "global123";
+  <button onclick="calculateAndSubmit()">Calculate & Submit</button>
+  <button onclick="promptAdminLogin()">Admin Settings</button>
 
-    const adjustmentFactors = {
-      fireLoss: -0.12,
-      batteryMissing: -0.055,
-      spareMissing: -0.03,
-      alloy: 0.06,
-      codTrade: 0.06,
-      cng: 0.04,
-      toyota: 0.05,
-      luxury: 0.10
+  <div class="result" id="finalRate"></div>
+  <div class="result" id="netRate"></div>
+
+  <div class="admin-section" id="adminPanel">
+    <h3>Admin Settings</h3>
+    <label>Base Rate (Rs/kg): <input type="number" id="baseRate" value="30"></label>
+    <label>Fire Loss (%): <input type="number" id="adj_fireLoss" value="-12"></label>
+    <label>Battery Missing (%): <input type="number" id="adj_batteryMissing" value="-5.5"></label>
+    <label>Spare Wheel Missing (%): <input type="number" id="adj_spareMissing" value="-3"></label>
+    <label>Alloy Wheels Fitted (%): <input type="number" id="adj_alloy" value="6"></label>
+    <label>COD Trade Done (%): <input type="number" id="adj_codTrade" value="6"></label>
+    <label>CNG Kit Fitted (%): <input type="number" id="adj_cng" value="4"></label>
+    <label>Toyota Vehicle (%): <input type="number" id="adj_toyota" value="5"></label>
+    <label>BMW / Merc / Audi (%): <input type="number" id="adj_luxury" value="10"></label>
+    <button onclick="saveAdminSettings()">Save Settings</button>
+  </div>
+</div>
+
+<script>
+  const PASSWORD = "global123";
+  const ADMIN_PASSWORD = "admin123";
+  let baseRate = 30;
+  let adminAdjustments = {
+    fireLoss: -0.12,
+    batteryMissing: -0.055,
+    spareMissing: -0.03,
+    alloy: 0.06,
+    codTrade: 0.06,
+    cng: 0.04,
+    toyota: 0.05,
+    luxury: 0.10
+  };
+
+  function checkPassword() {
+    const input = document.getElementById("passwordInput").value;
+    if (input === PASSWORD) {
+      document.getElementById("authSection").style.display = "none";
+      document.getElementById("formSection").style.display = "block";
+    } else {
+      alert("Incorrect form password");
+    }
+  }
+
+  function promptAdminLogin() {
+    const entered = prompt("Enter Admin Password:");
+    if (entered === ADMIN_PASSWORD) {
+      toggleAdminPanel();
+    } else {
+      alert("Incorrect admin password");
+    }
+  }
+
+  function toggleAdminPanel() {
+    const panel = document.getElementById("adminPanel");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  }
+
+  function saveAdminSettings() {
+    baseRate = parseFloat(document.getElementById("baseRate").value);
+    adminAdjustments = {
+      fireLoss: parseFloat(document.getElementById("adj_fireLoss").value) / 100,
+      batteryMissing: parseFloat(document.getElementById("adj_batteryMissing").value) / 100,
+      spareMissing: parseFloat(document.getElementById("adj_spareMissing").value) / 100,
+      alloy: parseFloat(document.getElementById("adj_alloy").value) / 100,
+      codTrade: parseFloat(document.getElementById("adj_codTrade").value) / 100,
+      cng: parseFloat(document.getElementById("adj_cng").value) / 100,
+      toyota: parseFloat(document.getElementById("adj_toyota").value) / 100,
+      luxury: parseFloat(document.getElementById("adj_luxury").value) / 100
+    };
+    alert("Admin settings updated.");
+  }
+
+  function calculateAndSubmit() {
+    const weight = parseFloat(document.getElementById("weight").value);
+    const towing = parseFloat(document.getElementById("towing").value);
+    const adjustments = ["fireLoss","batteryMissing","spareMissing","alloy","codTrade","cng","toyota","luxury"];
+    const splNo = document.getElementById("splNo").value;
+    const carMake = document.getElementById("carMake").value;
+    const carModel = document.getElementById("carModel").value;
+    const carYear = document.getElementById("carYear").value;
+
+    let totalAdjustment = 0;
+    const selectedFactors = {};
+
+    adjustments.forEach(key => {
+      const checked = document.getElementById(key).checked;
+      if (checked) totalAdjustment += adminAdjustments[key];
+      selectedFactors[key] = checked;
+    });
+
+    const baseAmount = weight * baseRate;
+    const adjustedAmount = baseAmount * (1 + totalAdjustment) - towing;
+    const ratePerKg = adjustedAmount / weight;
+
+    document.getElementById("finalRate").textContent = `Final Rate: ₹${adjustedAmount.toFixed(2)} per vehicle`;
+    document.getElementById("netRate").textContent = `Net Rate: ₹${ratePerKg.toFixed(2)} per kg`;
+
+    const data = {
+      splNo, carMake, carModel, carYear,
+      weight, towing,
+      adjustedAmount: adjustedAmount.toFixed(2),
+      ratePerKg: ratePerKg.toFixed(2),
+      ...selectedFactors,
+      timestamp: new Date().toISOString()
     };
 
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      if (input === PASSWORD) {
-        document.getElementById("authSection").style.display = "none";
-        document.getElementById("formSection").style.display = "block";
-      } else {
-        alert("Incorrect password");
-      }
-    }
+    fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID_HERE/exec', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+  }
+</script>
 
-    function calculateAndSubmit() {
-      const splNo = document.getElementById("splNo").value;
-      const carMake = document.getElementById("carMake").value;
-      const carModel = document.getElementById("carModel").value;
-      const carYear = document.getElementById("carYear").value;
-
-      const weight = parseFloat(document.getElementById("weight").value);
-      const towing = parseFloat(document.getElementById("towing").value);
-
-      const factors = {
-        fireLoss: document.getElementById("fireLoss").checked,
-        batteryMissing: document.getElementById("batteryMissing").checked,
-        spareMissing: document.getElementById("spareMissing").checked,
-        alloy: document.getElementById("alloy").checked,
-        codTrade: document.getElementById("codTrade").checked,
-        cng: document.getElementById("cng").checked,
-        toyota: document.getElementById("toyota").checked,
-        luxury: document.getElementById("luxury").checked
-      };
-
-      if (isNaN(weight) || weight <= 0) {
-        alert("Please enter a valid weight.");
-        return;
-      }
-
-      let adjustment = 0;
-      for (let key in factors) {
-        if (factors[key]) adjustment += adjustmentFactors[key];
-      }
-
-      const baseAmount = weight * BASE_RATE;
-      const adjustedAmount = baseAmount * (1 + adjustment) - towing;
-      const ratePerKg = adjustedAmount / weight;
-
-      document.getElementById("finalRate").textContent = `Final Rate: ₹${adjustedAmount.toFixed(2)} per vehicle`;
-      document.getElementById("netRate").innerHTML = `Net Rate: ₹${ratePerKg.toFixed(2)} per kg <span class="admin-label">(Only for Admin)</span>`;
-
-      const data = {
-        splNo, carMake, carModel, carYear,
-        weight, towing,
-        adjustedAmount: adjustedAmount.toFixed(2),
-        ratePerKg: ratePerKg.toFixed(2),
-        ...factors,
-        timestamp: new Date().toISOString()
-      };
-
-      fetch('https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-    }
-  </script>
 </body>
 </html>
