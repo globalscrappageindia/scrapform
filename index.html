@@ -36,6 +36,7 @@
 <div id="authSection">
   <label>Enter Form Password:
     <input type="password" id="passwordInput">
+    <input type="checkbox" id="togglePassword"> Show Password
   </label>
   <button onclick="checkPassword()">Login</button>
 </div>
@@ -100,6 +101,7 @@
   function checkPassword() {
     const input = document.getElementById("passwordInput").value;
     if (input === PASSWORD || input === ADMIN_PASSWORD) {
+      showLoginSuccess();
       document.getElementById("authSection").style.display = "none";
       document.getElementById("formSection").style.display = "block";
       if (input === ADMIN_PASSWORD) {
@@ -136,6 +138,8 @@
       toyota: parseFloat(document.getElementById("adj_toyota").value) / 100,
       luxury: parseFloat(document.getElementById("adj_luxury").value) / 100
     };
+    localStorage.setItem("baseRate", baseRate);
+    localStorage.setItem("adminAdjustments", JSON.stringify(adminAdjustments));
     alert("Admin settings updated.");
   }
 
@@ -180,6 +184,44 @@
       body: JSON.stringify(data)
     });
   }
+
+  // Toggle password visibility
+  document.getElementById("togglePassword").addEventListener("change", function () {
+    const pwdInput = document.getElementById("passwordInput");
+    pwdInput.type = this.checked ? "text" : "password";
+  });
+
+  // Visual login confirmation
+  function showLoginSuccess() {
+    const msg = document.createElement("div");
+    msg.textContent = "✅ Login successful";
+    msg.style.color = "green";
+    msg.style.fontWeight = "bold";
+    msg.style.marginTop = "15px";
+    document.getElementById("authSection").appendChild(msg);
+    setTimeout(() => msg.remove(), 3000);
+  }
+
+  // Load saved admin settings if available
+  window.addEventListener("load", function () {
+    const storedRate = localStorage.getItem("baseRate");
+    const storedAdjustments = localStorage.getItem("adminAdjustments");
+    if (storedRate) {
+      baseRate = parseFloat(storedRate);
+      document.getElementById("baseRate").value = baseRate;
+    }
+    if (storedAdjustments) {
+      adminAdjustments = JSON.parse(storedAdjustments);
+      document.getElementById("adj_fireLoss").value = (adminAdjustments.fireLoss * 100).toFixed(2);
+      document.getElementById("adj_batteryMissing").value = (adminAdjustments.batteryMissing * 100).toFixed(2);
+      document.getElementById("adj_spareMissing").value = (adminAdjustments.spareMissing * 100).toFixed(2);
+      document.getElementById("adj_alloy").value = (adminAdjustments.alloy * 100).toFixed(2);
+      document.getElementById("adj_codTrade").value = (adminAdjustments.codTrade * 100).toFixed(2);
+      document.getElementById("adj_cng").value = (adminAdjustments.cng * 100).toFixed(2);
+      document.getElementById("adj_toyota").value = (adminAdjustments.toyota * 100).toFixed(2);
+      document.getElementById("adj_luxury").value = (adminAdjustments.luxury * 100).toFixed(2);
+    }
+  });
 </script>
 
 </body>
