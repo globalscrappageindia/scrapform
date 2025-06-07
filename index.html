@@ -139,7 +139,7 @@ function saveAdminSettings() {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(config)
   })
-  .then(() => alert("✅ Settings submitted (response not visible due to CORS)"))
+  .then(() => alert("✅ Settings submitted "))
   .catch(() => alert("❌ Failed to save settings. Please check your network."));
 }
 
