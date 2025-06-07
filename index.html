@@ -64,71 +64,62 @@
   </div>
 
   <button onclick="calculateAndSubmit()">Calculate & Submit</button>
-  
+
   <div class="result" id="finalRate"></div>
   <div class="result" id="netRate"></div>
 
   <div class="admin-section" id="adminPanel">
     <h3>Admin Settings</h3>
     <label>Base Rate (Rs/kg): <input type="number" id="baseRate" value="30"></label>
-    <label>Fire Loss (%): <input type="number" id="adj_fireLoss" value="-12"></label>
-    <label>Battery Missing (%): <input type="number" id="adj_batteryMissing" value="-5.5"></label>
-    <label>Spare Wheel Missing (%): <input type="number" id="adj_spareMissing" value="-3"></label>
-    <label>Alloy Wheels Fitted (%): <input type="number" id="adj_alloy" value="6"></label>
-    <label>COD Trade Done (%): <input type="number" id="adj_codTrade" value="6"></label>
-    <label>CNG Kit Fitted (%): <input type="number" id="adj_cng" value="4"></label>
-    <label>Toyota Vehicle (%): <input type="number" id="adj_toyota" value="5"></label>
-    <label>BMW / Merc / Audi (%): <input type="number" id="adj_luxury" value="10"></label>
+    <label>Fire Loss (%): <input type="number" id="adj_fireLoss"></label>
+    <label>Battery Missing (%): <input type="number" id="adj_batteryMissing"></label>
+    <label>Spare Wheel Missing (%): <input type="number" id="adj_spareMissing"></label>
+    <label>Alloy Wheels Fitted (%): <input type="number" id="adj_alloy"></label>
+    <label>COD Trade Done (%): <input type="number" id="adj_codTrade"></label>
+    <label>CNG Kit Fitted (%): <input type="number" id="adj_cng"></label>
+    <label>Toyota Vehicle (%): <input type="number" id="adj_toyota"></label>
+    <label>BMW / Merc / Audi (%): <input type="number" id="adj_luxury"></label>
     <button onclick="saveAdminSettings()">Save Settings</button>
   </div>
 </div>
-  
 
 <script>
-  const PASSWORD = "global123";
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec";
-  const ADMIN_PASSWORD = "admin123";
-  let baseRate = 30;
-  let adminAdjustments = {
-    fireLoss: -0.12,
-    batteryMissing: -0.055,
-    spareMissing: -0.03,
-    alloy: 0.06,
-    codTrade: 0.06,
-    cng: 0.04,
-    toyota: 0.05,
-    luxury: 0.10
-  };
+const PASSWORD = "global123";
+const ADMIN_PASSWORD = "admin123";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec";
+let baseRate = 30;
+let adminAdjustments = {};
 
-  function checkPassword() {
-    const input = document.getElementById("passwordInput").value;
-    if (input === PASSWORD || input === ADMIN_PASSWORD) {
-      showLoginSuccess();
-      document.getElementById("authSection").style.display = "none";
-      document.getElementById("formSection").style.display = "block";
-      if (input === ADMIN_PASSWORD) {
-        document.getElementById("adminPanel").style.display = "block";
-      }
-    } else {
-      alert("Incorrect password");
+function checkPassword() {
+  const input = document.getElementById("passwordInput").value;
+  if (input === PASSWORD || input === ADMIN_PASSWORD) {
+    showLoginSuccess();
+    document.getElementById("authSection").style.display = "none";
+    document.getElementById("formSection").style.display = "block";
+    if (input === ADMIN_PASSWORD) {
+      document.getElementById("adminPanel").style.display = "block";
     }
+  } else {
+    alert("Incorrect password");
   }
+}
 
-  function promptAdminLogin() {
-    const entered = prompt("Enter Admin Password:");
-    if (entered === ADMIN_PASSWORD) {
-      toggleAdminPanel();
-    } else {
-      alert("Incorrect admin password");
-    }
-  }
+function showLoginSuccess() {
+  const msg = document.createElement("div");
+  msg.textContent = "✅ Login successful";
+  msg.style.color = "green";
+  msg.style.fontWeight = "bold";
+  msg.style.marginTop = "15px";
+  document.getElementById("authSection").appendChild(msg);
+  setTimeout(() => msg.remove(), 3000);
+}
 
-  function toggleAdminPanel() {
-    const panel = document.getElementById("adminPanel");
-    panel.style.display = panel.style.display === "none" ? "block" : "none";
-  }
+document.getElementById("togglePassword").addEventListener("change", function () {
+  const pwdInput = document.getElementById("passwordInput");
+  pwdInput.type = this.checked ? "text" : "password";
+});
 
- function saveAdminSettings() {
+function saveAdminSettings() {
   const config = {
     action: "saveSettings",
     baseRate: parseFloat(document.getElementById("baseRate").value),
@@ -151,70 +142,55 @@
   .catch(() => alert("❌ Failed to save settings. Please check your network or permissions."));
 }
 
+function calculateAndSubmit() {
+  const weight = parseFloat(document.getElementById("weight").value);
+  const towing = parseFloat(document.getElementById("towing").value);
+  const adjustments = ["fireLoss","batteryMissing","spareMissing","alloy","codTrade","cng","toyota","luxury"];
+  const splNo = document.getElementById("splNo").value;
+  const carMake = document.getElementById("carMake").value;
+  const carModel = document.getElementById("carModel").value;
+  const carYear = document.getElementById("carYear").value;
 
-  function calculateAndSubmit() {
-    const weight = parseFloat(document.getElementById("weight").value);
-    const towing = parseFloat(document.getElementById("towing").value);
-    const adjustments = ["fireLoss","batteryMissing","spareMissing","alloy","codTrade","cng","toyota","luxury"];
-    const splNo = document.getElementById("splNo").value;
-    const carMake = document.getElementById("carMake").value;
-    const carModel = document.getElementById("carModel").value;
-    const carYear = document.getElementById("carYear").value;
-
-    let totalAdjustment = 0;
-    const selectedFactors = {};
-
-    adjustments.forEach(key => {
-      const checked = document.getElementById(key).checked;
-      if (checked) totalAdjustment += adminAdjustments[key];
-      selectedFactors[key] = checked;
-    });
-
-    const baseAmount = weight * baseRate;
-    const adjustedAmount = baseAmount * (1 + totalAdjustment) - towing;
-    const ratePerKg = adjustedAmount / weight;
-
-    document.getElementById("finalRate").textContent = `Final Rate: ₹${adjustedAmount.toFixed(2)} per vehicle`;
-    document.getElementById("netRate").textContent = `Net Rate: ₹${ratePerKg.toFixed(2)} per kg`;
-
-    const data = {
-      splNo, carMake, carModel, carYear,
-      weight, towing,
-      adjustedAmount: adjustedAmount.toFixed(2),
-      ratePerKg: ratePerKg.toFixed(2),
-      ...selectedFactors,
-      timestamp: new Date().toISOString()
-    };
-
-  fetch('https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec', {
-  method: 'POST',
-  mode: 'no-cors',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify(data)
-});
-
-  }
-
-  // Toggle password visibility
-  document.getElementById("togglePassword").addEventListener("change", function () {
-    const pwdInput = document.getElementById("passwordInput");
-    pwdInput.type = this.checked ? "text" : "password";
+  let totalAdjustment = 0;
+  const selectedFactors = {};
+  adjustments.forEach(key => {
+    const checked = document.getElementById(key).checked;
+    if (checked) totalAdjustment += adminAdjustments[key];
+    selectedFactors[key] = checked;
   });
 
-  // Visual login confirmation
-  function showLoginSuccess() {
-    const msg = document.createElement("div");
-    msg.textContent = "✅ Login successful";
-    msg.style.color = "green";
-    msg.style.fontWeight = "bold";
-    msg.style.marginTop = "15px";
-    document.getElementById("authSection").appendChild(msg);
-    setTimeout(() => msg.remove(), 3000);
-  }
+  const baseAmount = weight * baseRate;
+  const adjustedAmount = baseAmount * (1 + totalAdjustment) - towing;
+  const ratePerKg = adjustedAmount / weight;
 
-  // Load saved admin settings if available
-  window.addEventListener("load", function () {
-    window.addEventListener("load", function () {
+  document.getElementById("finalRate").textContent = `Final Rate: ₹${adjustedAmount.toFixed(2)} per vehicle`;
+  document.getElementById("netRate").textContent = `Net Rate: ₹${ratePerKg.toFixed(2)} per kg`;
+
+  const data = {
+    splNo, carMake, carModel, carYear,
+    weight, towing,
+    adjustedAmount: adjustedAmount.toFixed(2),
+    ratePerKg: ratePerKg.toFixed(2),
+    fireLoss: selectedFactors.fireLoss,
+    batteryMissing: selectedFactors.batteryMissing,
+    spareMissing: selectedFactors.spareMissing,
+    alloy: selectedFactors.alloy,
+    codTrade: selectedFactors.codTrade,
+    cng: selectedFactors.cng,
+    toyota: selectedFactors.toyota,
+    luxury: selectedFactors.luxury
+  };
+
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+}
+
+// Load admin settings from Google Sheet
+window.addEventListener("load", function () {
   fetch(SCRIPT_URL + '?action=getSettings')
     .then(res => res.json())
     .then(config => {
@@ -230,7 +206,6 @@
         luxury: parseFloat(config.luxury)
       };
 
-      // Populate form inputs
       document.getElementById("baseRate").value = baseRate;
       document.getElementById("adj_fireLoss").value = (adminAdjustments.fireLoss * 100).toFixed(2);
       document.getElementById("adj_batteryMissing").value = (adminAdjustments.batteryMissing * 100).toFixed(2);
@@ -245,25 +220,6 @@
       alert("❌ Failed to load admin settings from sheet");
     });
 });
-
-    const storedRate = localStorage.getItem("baseRate");
-    const storedAdjustments = localStorage.getItem("adminAdjustments");
-    if (storedRate) {
-      baseRate = parseFloat(storedRate);
-      document.getElementById("baseRate").value = baseRate;
-    }
-    if (storedAdjustments) {
-      adminAdjustments = JSON.parse(storedAdjustments);
-      document.getElementById("adj_fireLoss").value = (adminAdjustments.fireLoss * 100).toFixed(2);
-      document.getElementById("adj_batteryMissing").value = (adminAdjustments.batteryMissing * 100).toFixed(2);
-      document.getElementById("adj_spareMissing").value = (adminAdjustments.spareMissing * 100).toFixed(2);
-      document.getElementById("adj_alloy").value = (adminAdjustments.alloy * 100).toFixed(2);
-      document.getElementById("adj_codTrade").value = (adminAdjustments.codTrade * 100).toFixed(2);
-      document.getElementById("adj_cng").value = (adminAdjustments.cng * 100).toFixed(2);
-      document.getElementById("adj_toyota").value = (adminAdjustments.toyota * 100).toFixed(2);
-      document.getElementById("adj_luxury").value = (adminAdjustments.luxury * 100).toFixed(2);
-    }
-  });
 </script>
 
 </body>
