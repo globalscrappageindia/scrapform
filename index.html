@@ -82,9 +82,11 @@
     <button onclick="saveAdminSettings()">Save Settings</button>
   </div>
 </div>
+  
 
 <script>
   const PASSWORD = "global123";
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec";
   const ADMIN_PASSWORD = "admin123";
   let baseRate = 30;
   let adminAdjustments = {
@@ -126,22 +128,29 @@
     panel.style.display = panel.style.display === "none" ? "block" : "none";
   }
 
-  function saveAdminSettings() {
-    baseRate = parseFloat(document.getElementById("baseRate").value);
-    adminAdjustments = {
-      fireLoss: parseFloat(document.getElementById("adj_fireLoss").value) / 100,
-      batteryMissing: parseFloat(document.getElementById("adj_batteryMissing").value) / 100,
-      spareMissing: parseFloat(document.getElementById("adj_spareMissing").value) / 100,
-      alloy: parseFloat(document.getElementById("adj_alloy").value) / 100,
-      codTrade: parseFloat(document.getElementById("adj_codTrade").value) / 100,
-      cng: parseFloat(document.getElementById("adj_cng").value) / 100,
-      toyota: parseFloat(document.getElementById("adj_toyota").value) / 100,
-      luxury: parseFloat(document.getElementById("adj_luxury").value) / 100
-    };
-    localStorage.setItem("baseRate", baseRate);
-    localStorage.setItem("adminAdjustments", JSON.stringify(adminAdjustments));
-    alert("Admin settings updated.");
-  }
+ function saveAdminSettings() {
+  const config = {
+    action: "saveSettings",
+    baseRate: parseFloat(document.getElementById("baseRate").value),
+    fireLoss: parseFloat(document.getElementById("adj_fireLoss").value) / 100,
+    batteryMissing: parseFloat(document.getElementById("adj_batteryMissing").value) / 100,
+    spareMissing: parseFloat(document.getElementById("adj_spareMissing").value) / 100,
+    alloy: parseFloat(document.getElementById("adj_alloy").value) / 100,
+    codTrade: parseFloat(document.getElementById("adj_codTrade").value) / 100,
+    cng: parseFloat(document.getElementById("adj_cng").value) / 100,
+    toyota: parseFloat(document.getElementById("adj_toyota").value) / 100,
+    luxury: parseFloat(document.getElementById("adj_luxury").value) / 100
+  };
+
+  fetch(SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(config)
+  })
+  .then(() => alert("✅ Admin settings saved to Google Sheet."))
+  .catch(() => alert("❌ Failed to save settings. Please check your network or permissions."));
+}
+
 
   function calculateAndSubmit() {
     const weight = parseFloat(document.getElementById("weight").value);
@@ -205,6 +214,38 @@
 
   // Load saved admin settings if available
   window.addEventListener("load", function () {
+    window.addEventListener("load", function () {
+  fetch(SCRIPT_URL + '?action=getSettings')
+    .then(res => res.json())
+    .then(config => {
+      baseRate = parseFloat(config.baseRate);
+      adminAdjustments = {
+        fireLoss: parseFloat(config.fireLoss),
+        batteryMissing: parseFloat(config.batteryMissing),
+        spareMissing: parseFloat(config.spareMissing),
+        alloy: parseFloat(config.alloy),
+        codTrade: parseFloat(config.codTrade),
+        cng: parseFloat(config.cng),
+        toyota: parseFloat(config.toyota),
+        luxury: parseFloat(config.luxury)
+      };
+
+      // Populate form inputs
+      document.getElementById("baseRate").value = baseRate;
+      document.getElementById("adj_fireLoss").value = (adminAdjustments.fireLoss * 100).toFixed(2);
+      document.getElementById("adj_batteryMissing").value = (adminAdjustments.batteryMissing * 100).toFixed(2);
+      document.getElementById("adj_spareMissing").value = (adminAdjustments.spareMissing * 100).toFixed(2);
+      document.getElementById("adj_alloy").value = (adminAdjustments.alloy * 100).toFixed(2);
+      document.getElementById("adj_codTrade").value = (adminAdjustments.codTrade * 100).toFixed(2);
+      document.getElementById("adj_cng").value = (adminAdjustments.cng * 100).toFixed(2);
+      document.getElementById("adj_toyota").value = (adminAdjustments.toyota * 100).toFixed(2);
+      document.getElementById("adj_luxury").value = (adminAdjustments.luxury * 100).toFixed(2);
+    })
+    .catch(() => {
+      alert("❌ Failed to load admin settings from sheet");
+    });
+});
+
     const storedRate = localStorage.getItem("baseRate");
     const storedAdjustments = localStorage.getItem("adminAdjustments");
     if (storedRate) {
