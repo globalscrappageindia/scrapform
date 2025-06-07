@@ -134,12 +134,14 @@ function saveAdminSettings() {
   };
 
   fetch(SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(config)
-  })
-  .then(() => alert("✅ Admin settings saved to Google Sheet."))
-  .catch(() => alert("❌ Failed to save settings. Please check your network or permissions."));
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(config)
+})
+.then(res => res.text())
+.then(text => alert("✅ " + text))
+.catch(err => alert("❌ Failed to save settings. Please check your network or permissions."));
+
 }
 
 function calculateAndSubmit() {
