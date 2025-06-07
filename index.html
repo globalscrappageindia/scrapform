@@ -177,12 +177,13 @@
       timestamp: new Date().toISOString()
     };
 
-    fetch('https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec', {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+  fetch('https://script.google.com/macros/s/AKfycbxBweUJeesRDn5L3YHykIAzYhuKEanqavnxJU6AG-ahW9xkpcKy7f1rBjmdH6sXQa1k_w/exec', {
+  method: 'POST',
+  mode: 'no-cors',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(data)
+});
+
   }
 
   // Toggle password visibility
