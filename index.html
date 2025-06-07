@@ -70,7 +70,7 @@
 
   <div class="admin-section" id="adminPanel">
     <h3>Admin Settings</h3>
-    <label>Base Rate (Rs/kg): <input type="number" id="baseRate" value="30"></label>
+    <label>Base Rate (Rs/kg): <input type="number" id="baseRate"></label>
     <label>Fire Loss (%): <input type="number" id="adj_fireLoss"></label>
     <label>Battery Missing (%): <input type="number" id="adj_batteryMissing"></label>
     <label>Spare Wheel Missing (%): <input type="number" id="adj_spareMissing"></label>
@@ -134,14 +134,13 @@ function saveAdminSettings() {
   };
 
   fetch(SCRIPT_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(config)
-})
-.then(res => res.text())
-.then(text => alert("✅ " + text))
-.catch(err => alert("❌ Failed to save settings. Please check your network or permissions."));
-
+    method: "POST",
+    mode: "no-cors", // ✅ Prevent CORS blocking
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(config)
+  })
+  .then(() => alert("✅ Settings submitted (response not visible due to CORS)"))
+  .catch(() => alert("❌ Failed to save settings. Please check your network."));
 }
 
 function calculateAndSubmit() {
@@ -173,14 +172,7 @@ function calculateAndSubmit() {
     weight, towing,
     adjustedAmount: adjustedAmount.toFixed(2),
     ratePerKg: ratePerKg.toFixed(2),
-    fireLoss: selectedFactors.fireLoss,
-    batteryMissing: selectedFactors.batteryMissing,
-    spareMissing: selectedFactors.spareMissing,
-    alloy: selectedFactors.alloy,
-    codTrade: selectedFactors.codTrade,
-    cng: selectedFactors.cng,
-    toyota: selectedFactors.toyota,
-    luxury: selectedFactors.luxury
+    ...selectedFactors
   };
 
   fetch(SCRIPT_URL, {
@@ -191,7 +183,7 @@ function calculateAndSubmit() {
   });
 }
 
-// Load admin settings from Google Sheet
+// Load admin settings from sheet on page load
 window.addEventListener("load", function () {
   fetch(SCRIPT_URL + '?action=getSettings')
     .then(res => res.json())
