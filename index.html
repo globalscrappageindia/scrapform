@@ -29,7 +29,8 @@
 </head>
 <body>
 
-<h2>Vehicle Scrap Value Calculator</h2>
+<img src="https://globalscrappageyardsindia.wordpress.com/wp-content/uploads/2024/07/global-1-1.png" alt="Logo" style="max-width: 200px; display: block; margin: 0 auto 10px auto;">
+<h2 style="text-align:center; color:#333;">Vehicle Scrap Value Calculator</h2>
 
 <!-- Password Authentication -->
 <div id="authSection">
@@ -62,8 +63,7 @@
   </div>
 
   <button onclick="calculateAndSubmit()">Calculate & Submit</button>
-  <button onclick="promptAdminLogin()">Admin Settings</button>
-
+  
   <div class="result" id="finalRate"></div>
   <div class="result" id="netRate"></div>
 
@@ -99,11 +99,14 @@
 
   function checkPassword() {
     const input = document.getElementById("passwordInput").value;
-    if (input === PASSWORD) {
+    if (input === PASSWORD || input === ADMIN_PASSWORD) {
       document.getElementById("authSection").style.display = "none";
       document.getElementById("formSection").style.display = "block";
+      if (input === ADMIN_PASSWORD) {
+        document.getElementById("adminPanel").style.display = "block";
+      }
     } else {
-      alert("Incorrect form password");
+      alert("Incorrect password");
     }
   }
 
